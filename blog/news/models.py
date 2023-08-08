@@ -14,8 +14,6 @@ User = get_user_model()
 class Blog(models.Model):
     user = models.OneToOneField(User, verbose_name='Пользователь',
                              on_delete=models.CASCADE, related_name='blog')
-    phonenumber = models.CharField(max_length=20, default='+79999999999')
-    tg = models.CharField(max_length=100, default='@имя_пользователя')
 
     def __str__(self):
         return f'Блог пользователя {self.user.username}'
