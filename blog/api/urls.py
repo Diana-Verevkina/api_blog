@@ -12,4 +12,7 @@ router_v1.register('follow', FollowViewSet, basename='follow')
 
 urlpatterns = [
     path('v1/', include(router_v1.urls)),
+    path('auth/', include('djoser.urls')),
+    # JWT-эндпоинты, для управления JWT-токенами:
+    path('auth/', include('djoser.urls.jwt')),
     ]
