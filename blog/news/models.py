@@ -41,9 +41,11 @@ def save_or_create_blog(sender, instance, created, **kwargs):
 
 class Post(models.Model):
     header = models.TextField(verbose_name='Заголовок поста',
-                              help_text='Введите заголовок поста')
-    text = models.TextField(verbose_name='Текст поста',
-                            help_text='Введите текст поста')
+                              help_text='Введите заголовок поста',
+                              )
+    text = models.CharField(verbose_name='Текст поста',
+                            help_text='Введите текст поста', max_length=140,
+                            null=True, blank=True)
     pub_date = models.DateTimeField(verbose_name='Дата публикации',
                                     auto_now_add=True)
     author = models.ForeignKey(User, verbose_name='Автор',
@@ -65,11 +67,11 @@ class Follow(models.Model):
                              null=True, related_name='follower',
                              help_text='Ссылка на объект пользователя, '
                                        'который подписывается')
-    author = models.ForeignKey(User, verbose_name='Автор',
+    blog = models.ForeignKey(Blog, verbose_name='Блог',
                                on_delete=models.CASCADE, blank=True,
                                null=True, related_name='following',
-                               help_text='Ссылка на объект пользователя, '
-                                         'на которого подписываются')
+                               help_text='Ссылка на блог пользователя, '
+                                         'на который подписываются')
 
     class Meta:
         verbose_name = 'Подписка'
