@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from news.models import Blog, Post, Follow
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
+from news import services as likes_services
 
 #User = get_user_model()
 
@@ -10,6 +11,7 @@ from rest_framework.validators import UniqueTogetherValidator
 
 class PostsSerializer(serializers.ModelSerializer):
     """Сериализер для модели Post."""
+    is_fan = serializers.SerializerMethodField()
     pub_date = serializers.DateTimeField(format="%Y-%m-%d", required=False)
     author = serializers.SlugRelatedField(
         default=serializers.CurrentUserDefault(),
@@ -18,7 +20,13 @@ class PostsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('id', 'header', 'text', 'pub_date', 'author', 'blog')
+        fields = ('id', 'header', 'text', 'pub_date', 'author', 'blog', 'total_likes', 'is_fan')
+
+    def get_is_fan(self, obj) -> bool:
+        """Проверяет, лайкнул ли `request.user` твит (`obj`).
+        """
+        user = self.context.get('request').user
+        return likes_services.is_fan(obj, user)
 
 
 class FollowSerializer(serializers.ModelSerializer):

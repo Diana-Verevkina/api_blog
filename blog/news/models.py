@@ -1,9 +1,12 @@
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.fields import GenericForeignKey, \
+    GenericRelation
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.exceptions import ObjectDoesNotExist
-#from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
+
 
 User = get_user_model()
 
@@ -28,6 +31,14 @@ def save_or_create_blog(sender, instance, created, **kwargs):
             Blog.objects.create(user=instance)
 
 
+class Read_post(models.Model):
+    user = models.ForeignKey(User, related_name='read',
+                             on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+
 class Post(models.Model):
     header = models.TextField(verbose_name='Заголовок поста',
                               help_text='Введите заголовок поста',
@@ -43,6 +54,8 @@ class Post(models.Model):
     blog = models.ForeignKey(Blog, verbose_name='Блог',
                                on_delete=models.CASCADE,
                                related_name='posts', null=True, blank=True)
+    likes = GenericRelation(Read_post)
+
 
     class Meta:
         ordering = ('pub_date',)
@@ -51,6 +64,10 @@ class Post(models.Model):
 
     def __str__(self):
         return self.header
+
+    @property
+    def total_likes(self):
+        return self.likes.count()
 
 
 class Follow(models.Model):

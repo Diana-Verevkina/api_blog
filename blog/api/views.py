@@ -7,9 +7,10 @@ from rest_framework.pagination import PageNumberPagination, \
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, \
     IsAuthenticated
 from .permissions import IsAuthorOrReadOnly
+from .mixins import LikedMixin
 
 
-class PostsViewSet(viewsets.ModelViewSet):
+class PostsViewSet(viewsets.ModelViewSet, LikedMixin):
     queryset = Post.objects.all()
     serializer_class = PostsSerializer
     #pagination_class = PageNumberPagination
@@ -35,7 +36,7 @@ class FollowViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user, blog_author=blog.user)
 
 
-class NewsViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
+class NewsViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, LikedMixin):
     serializer_class = PostsSerializer
     #pagination_class = PageNumberPagination
     pagination_class = LimitOffsetPagination
