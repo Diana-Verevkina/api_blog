@@ -7,22 +7,11 @@ from django.core.exceptions import ObjectDoesNotExist
 
 User = get_user_model()
 
-"""
-class MyUser(models.Model):
-    username = models.CharField(max_length=20)
-    password = models.CharField(max_length=20)
-
-    class Meta:
-        verbose_name = 'MyUser'
-        verbose_name_plural = 'MyUsers'
-
-    def __str__(self):
-        return self.username
-"""
 
 class Blog(models.Model):
     user = models.OneToOneField(User, verbose_name='Пользователь',
                              on_delete=models.CASCADE, related_name='blog')
+    blog_name = models.CharField(max_length=20, null=True, blank=True)
 
     def __str__(self):
         return f'Блог пользователя {self.user.username}'
@@ -51,6 +40,9 @@ class Post(models.Model):
     author = models.ForeignKey(User, verbose_name='Автор',
                                on_delete=models.CASCADE,
                                related_name='posts')
+    blog = models.ForeignKey(Blog, verbose_name='Блог',
+                               on_delete=models.CASCADE,
+                               related_name='posts', null=True, blank=True)
 
     class Meta:
         ordering = ('pub_date',)
@@ -69,13 +61,18 @@ class Follow(models.Model):
                                        'который подписывается')
     blog = models.ForeignKey(Blog, verbose_name='Блог',
                                on_delete=models.CASCADE, blank=True,
-                               null=True, related_name='following',
+                               null=True, related_name='following_blog',
                                help_text='Ссылка на блог пользователя, '
                                          'на который подписываются')
+    blog_author = models.ForeignKey(User, verbose_name='Автор блога',
+                             on_delete=models.CASCADE, blank=True,
+                             null=True, related_name='following',
+                             help_text='Ссылка на объект пользователя, '
+                                       'на которого подписываются')
 
     class Meta:
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
 
     def __str__(self):
-        return self.author.username
+        return self.blog.blog_name
