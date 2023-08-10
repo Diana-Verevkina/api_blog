@@ -3,7 +3,6 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 SECRET_KEY = 'django-insecure-uwj!4flkvt4y-x4*g$n_)bn%6)#_--^0gr59h(!_42qc_cl&!%'
 
 DEBUG = True
@@ -21,7 +20,6 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'news.apps.NewsConfig',
     'djoser',
-
 ]
 
 MIDDLEWARE = [
@@ -54,14 +52,25 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'blog.wsgi.application'
 
-
+"""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+"""
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgre_api',
+        'USER': 'postgres',
+        'PASSWORD': 'Stimorol1',
+        'HOST': 'localhost',
+        'PORT': 5434,
+    }
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {
