@@ -63,7 +63,9 @@ class Post(models.Model):
         verbose_name_plural = 'Посты'
 
     def __str__(self):
-        return self.header
+        return ('Заголовок: ' + self.header + '\n' + 'Текст поста: '
+                + self.text + '\n' + 'Автор поста: ' +
+                self.author.username + '\n')
 
     @property
     def total_likes(self):

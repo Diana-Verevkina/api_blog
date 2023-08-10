@@ -2,6 +2,7 @@ from celery import shared_task
 from django.core.mail import EmailMessage
 from django.contrib.auth.models import User
 from datetime import datetime, timedelta
+from ..news.models import Post, Follow
 
 
 @shared_task
@@ -11,7 +12,10 @@ def send_daily_emails():
 
     # Отправьте письмо каждому пользователю
     for user in users:
-        subject = 'Ежедневное письмо'
+        followed_people = Follow.objects.filter(user=user).values_list(
+            'blog_author', flat=True)
+        news = Post.objects.filter(author__in=followed_people).all()[:5]
+        subject = '\n'.join([str(post) for post in news])
         message = 'Привет, {}! Это ваше ежедневное письмо.'.format(
             user.username)
         from_email = 'diva2208@mail.ru'  # Укажите отправителя

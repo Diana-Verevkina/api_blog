@@ -54,8 +54,6 @@ class NewsViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, LikedMixin):
         # return Post.objects.filter(author__follower=self.request.user)
         # return posts
         followed_people = Follow.objects.filter(user=self.request.user).values_list('blog_author', flat=True)
-        print('--------------------------------------')
-        print(followed_people)
         return Post.objects.filter(author__in=followed_people).all()
 
     def perform_create(self, serializer):
