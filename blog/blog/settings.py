@@ -1,6 +1,33 @@
 from datetime import timedelta
 from pathlib import Path
 
+
+# Celery settings
+CELERY_APP = 'blog.celery'
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Адрес Redis сервера
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
+CELERY_BEAT_SCHEDULE = {
+    'send_daily_emails': {
+        'task': 'blog.tasks.send_daily_emails',  # Путь к вашей задаче
+        'schedule': timedelta(days=1),  # Раз в день
+    },
+}
+
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.mail.ru'  # Укажите SMTP-сервер
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'diva2208@mail.ru'  # Укажите вашу электронную почту
+EMAIL_HOST_PASSWORD = 'BengominStim2208'  # Укажите пароль от электронной почты
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-uwj!4flkvt4y-x4*g$n_)bn%6)#_--^0gr59h(!_42qc_cl&!%'
