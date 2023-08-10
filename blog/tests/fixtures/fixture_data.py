@@ -1,5 +1,5 @@
 import pytest
-from ...news.models import Post, Follow
+from news.models import Post, Follow
 
 
 @pytest.fixture
