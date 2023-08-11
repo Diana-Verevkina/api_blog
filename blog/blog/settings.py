@@ -32,8 +32,9 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'diva2208@mail.ru'
 EMAIL_HOST_PASSWORD = 'randompassword'  # пароль от электронной почты
 
+load_dotenv()
 
-SECRET_KEY = 'django-insecure-uwj!4flkvt4y-x4*g$n_)bn%6)#_--^0gr59h(!_42qc_cl&!%'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = True
 
@@ -90,9 +91,8 @@ DATABASES = {
     }
 }
 """
-load_dotenv()
 
-"""DATABASES = {
+DATABASES = {
     'default': {
         'ENGINE': os.getenv('DB_ENGINE'),
         'NAME': os.getenv('DB_NAME'),
@@ -102,18 +102,18 @@ load_dotenv()
         'PORT': os.getenv('DB_PORT')
     }
 }
-"""
 
+"""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgre_api',
         'USER': 'postgres',
         'PASSWORD': 'Stimorol1',
-        'HOST': 'localhost',
+        'HOST': 'db',
         'PORT': 5434,
     }
-}
+}"""
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
