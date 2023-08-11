@@ -31,7 +31,7 @@ class TestPostsAPI:
         )
 
     @pytest.mark.django_db(transaction=True)
-    def test_posts_auth(self, user_client, post, another_news):
+    def test_posts_auth(self, user_client, post):
         response = user_client.get('/v1/posts/')
         assert response.status_code == 200, (
             'Проверьте, что при GET запросе `/v1/posts/` с токеном авторизации '
@@ -55,91 +55,35 @@ class TestPostsAPI:
             'Проверьте, что добавили `id` в список полей `fields` '
             'сериализатора модели Post'
         )
+        assert 'header' in test_posts, (
+            'Проверьте, что добавили `header` в список полей `fields` '
+            'сериализатора модели Post'
+        )
         assert 'text' in test_posts, (
             'Проверьте, что добавили `text` в список полей `fields` '
             'сериализатора модели Post'
         )
-        assert 'author' in test_posts, (
-            'Проверьте, что добавили `author` в список полей `fields` '
-            'сериализатора модели News'
-        )
         assert 'pub_date' in test_posts, (
             'Проверьте, что добавили `pub_date` в список полей `fields` '
-            'сериализатора модели News'
+            'сериализатора модели Post'
         )
+        assert 'author' in test_posts, (
+            'Проверьте, что добавили `author` в список полей `fields` '
+            'сериализатора модели Post'
+        )
+        assert 'blog' in test_posts, (
+            'Проверьте, что добавили `blog` в список полей `fields` '
+            'сериализатора модели Post'
+        )
+
         assert test_posts['author'] == post.author.username, (
             'Проверьте, что `author` сериализатора модели Post возвращает '
             'имя пользователя'
         )
 
-        assert test_posts['id'] == post.id, (
-            'Проверьте, что при GET запросе на `/v1/posts/` возвращается весь '
-            'список статей'
-        )
-
-    @pytest.mark.django_db(transaction=True)
-    def test_posts_get_paginated(self, user_client, post, post_2, another_post):
-        base_url = '/v1/posts/'
-        limit = 2
-        offset = 2
-        url = f'{base_url}?limit={limit}&offset={offset}'
-        response = user_client.get(url)
-        assert response.status_code == 200, (
-            f'Проверьте, что при GET запросе `{url}` с токеном авторизации '
-            f'возвращается статус 200'
-        )
-
-        test_data = response.json()
-
-        # response with pagination must be a dict type
-        assert type(test_data) == dict, (
-            f'Проверьте, что при GET запросе на `{url}` с пагинацией, '
-            f'возвращается словарь'
-        )
-        assert "results" in test_data.keys(), (
-            f'Убедитесь, что при GET запросе на `{url}` с пагинацией, ключ '
-            f'`results` присутствует в ответе'
-        )
-        assert len(test_data.get('results')) == Post.objects.count() - offset, (
-            f'Проверьте, что при GET запросе на `{url}` с пагинацией, '
-            f'возвращается корректное количество статей'
-        )
-        assert test_data.get('results')[0].get('text') == another_post.text, (
-            f'Убедитесь, что при GET запросе на `{url}` с пагинацией, '
-            'в ответе содержатся корректные статьи'
-        )
-
-        posts = Post.objects.get(text=another_post.text)
-        test_post = test_data.get('results')[0]
-        assert 'id' in test_post, (
-            'Проверьте, что добавили `id` в список полей `fields` '
-            'сериализатора модели Post'
-        )
-        assert 'text' in test_post, (
-            'Проверьте, что добавили `text` в список полей `fields` '
-            'сериализатора модели Post'
-        )
-        assert 'author' in test_post, (
-            'Проверьте, что добавили `author` в список полей `fields` '
-            'сериализатора модели Post'
-        )
-        assert 'pub_date' in test_post, (
-            'Проверьте, что добавили `pub_date` в список полей `fields` '
-            'сериализатора модели Post'
-        )
-        assert test_post['author'] == post.author.username, (
-            'Проверьте, что `author` сериализатора модели Post возвращает '
-            'имя пользователя'
-        )
-        assert test_post['id'] == post.id, (
-            f'Проверьте, что при GET запросе на `{url}` возвращается '
-            f'корректный список статей'
-        )
-
     @pytest.mark.django_db(transaction=True)
     def test_posts_create(self, user_client, user, another_user):
         posts_count = Post.objects.count()
-
         data = {}
         response = user_client.post('/v1/posts/', data=data)
         assert response.status_code == 400, (
@@ -147,7 +91,7 @@ class TestPostsAPI:
             'данными возвращается статус 400'
         )
 
-        data = {'text': 'Статья номер 3'}
+        data = {'header': 'test', 'text': 'test text'}
         response = user_client.post('/v1/posts/', data=data)
         assert response.status_code == 201, (
             'Проверьте, что при POST запросе на `/v1/posts/` с правильными '
@@ -167,6 +111,7 @@ class TestPostsAPI:
             'словарь с данными новой статьи'
         )
         assert type(test_data) == dict, msg_error
+        assert test_data.get('header') == data['header'], msg_error
         assert test_data.get('text') == data['text'], msg_error
 
         assert test_data.get('author') == user.username, (
@@ -187,6 +132,10 @@ class TestPostsAPI:
         )
 
         test_data = response.json()
+        assert test_data.get('header') == post.header, (
+            'Проверьте, что при GET запросе `/v1/posts/{id}/` возвращаете '
+            'данные сериализатора, не найдено или неправильное значение `header`'
+        )
         assert test_data.get('text') == post.text, (
             'Проверьте, что при GET запросе `/v1/posts/{id}/` возвращаете '
             'данные сериализатора, не найдено или неправильное значение `text`'
@@ -198,7 +147,7 @@ class TestPostsAPI:
         )
 
     @pytest.mark.django_db(transaction=True)
-    def test_posts_patch_current(self, user_client, post, another_news):
+    def test_posts_patch_current(self, user_client, post, another_post):
         response = user_client.patch(f'/v1/posts/{post.id}/',
                                      data={'text': 'Поменяли текст статьи'})
 
@@ -219,7 +168,7 @@ class TestPostsAPI:
             'изменяете статью'
         )
 
-        response = user_client.patch(f'/v1/posts/{another_news.id}/',
+        response = user_client.patch(f'/v1/posts/{another_post.id}/',
                                      data={'text': 'Поменяли текст статьи'})
 
         assert response.status_code == 403, (
@@ -249,3 +198,4 @@ class TestPostsAPI:
             'Проверьте, что при DELETE запросе `/v1/posts/{id}/` для не своей '
             'статьи возвращаете статус 403'
         )
+

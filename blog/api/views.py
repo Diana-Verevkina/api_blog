@@ -1,20 +1,17 @@
-from django.shortcuts import render
 from rest_framework import viewsets, mixins
-from news.models import Blog, Post, Follow, User
-from .serializers import PostsSerializer, FollowSerializer
-from rest_framework.pagination import PageNumberPagination, \
-    LimitOffsetPagination
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, \
-    IsAuthenticated
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import (IsAuthenticatedOrReadOnly,
+                                        IsAuthenticated)
+
+from .mixins import ReadMixin
 from .permissions import IsAuthorOrReadOnly
-from .mixins import LikedMixin
+from .serializers import PostsSerializer, FollowSerializer
+from news.models import Blog, Post, Follow
 
 
-class PostsViewSet(viewsets.ModelViewSet, LikedMixin):
+class PostsViewSet(viewsets.ModelViewSet, ReadMixin):
     queryset = Post.objects.all()
     serializer_class = PostsSerializer
-    #pagination_class = PageNumberPagination
-    #pagination_class = LimitOffsetPagination
     ordering_fields = ['pub_date']
     permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
 
@@ -36,24 +33,17 @@ class FollowViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user, blog_author=blog.user)
 
 
-class NewsViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, LikedMixin):
+class NewsViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, ReadMixin):
     serializer_class = PostsSerializer
-    #pagination_class = PageNumberPagination
-    pagination_class = LimitOffsetPagination
+    pagination_class = PageNumberPagination
+    #pagination_class = LimitOffsetPagination
     ordering_fields = ['pub_date']
     permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
 
     def get_queryset(self):
-        #followed_people = User.objects.filter(follower__user=self.request.user).all()
-        #followed_people = Follow.objects.filter(user=self.request.user).all()
-        #authors = self.request.user.follower.all()
-        #posts = Post.objects.filter(author__follower__user=self.request.user)
-        #posts = Post.objects.filter(author__follower__user=self.request.user)
-        #blog = Blog.objects.get(user=self.request.user)
-        #return Post.objects.filter(author__in=followed_people.following).all()
-        # return Post.objects.filter(author__follower=self.request.user)
-        # return posts
-        followed_people = Follow.objects.filter(user=self.request.user).values_list('blog_author', flat=True)
+        followed_people = Follow.objects.filter(
+            user=self.request.user).values_list('blog_author', flat=True
+                                                )
         return Post.objects.filter(author__in=followed_people).all()
 
     def perform_create(self, serializer):

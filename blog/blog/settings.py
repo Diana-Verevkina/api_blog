@@ -1,5 +1,10 @@
+import os
 from datetime import timedelta
 from pathlib import Path
+
+from dotenv import load_dotenv
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 # Celery settings
@@ -14,27 +19,25 @@ CELERY_TIMEZONE = 'UTC'
 
 CELERY_BEAT_SCHEDULE = {
     'send_daily_emails': {
-        'task': 'blog.tasks.send_daily_emails',  # Путь к вашей задаче
+        'task': 'blog.tasks.send_daily_emails',  # Путь к задаче
         'schedule': timedelta(days=1),  # Раз в день
     },
 }
 
 # Email settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.mail.ru'  # Укажите SMTP-сервер
+EMAIL_HOST = 'smtp.mail.ru'  # SMTP-сервер
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'diva2208@mail.ru'  # Укажите вашу электронную почту
-EMAIL_HOST_PASSWORD = 'BengominStim2208'  # Укажите пароль от электронной почты
+EMAIL_HOST_USER = 'diva2208@mail.ru'
+EMAIL_HOST_PASSWORD = 'randompassword'  # пароль от электронной почты
 
-
-BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-uwj!4flkvt4y-x4*g$n_)bn%6)#_--^0gr59h(!_42qc_cl&!%'
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 INSTALLED_APPS = [
@@ -87,6 +90,19 @@ DATABASES = {
     }
 }
 """
+load_dotenv()
+
+"""DATABASES = {
+    'default': {
+        'ENGINE': os.getenv('DB_ENGINE'),
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT')
+    }
+}
+"""
 
 DATABASES = {
     'default': {
@@ -98,7 +114,6 @@ DATABASES = {
         'PORT': 5434,
     }
 }
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -117,7 +132,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'ru-ru'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
@@ -125,8 +140,11 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -143,7 +161,6 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    # Устанавливаем срок жизни токена
    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
    'AUTH_HEADER_TYPES': ('Bearer',),
 }

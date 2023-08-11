@@ -1,35 +1,30 @@
 from django.contrib.contenttypes.models import ContentType
 
-from .models import Read_post, User
+from .models import ReadPost
 
 
-def add_like(obj, user):
-    """Лайкает `obj`."""
+def add_read(obj, user):
+    """Отмечает прочитанным `obj`."""
     obj_type = ContentType.objects.get_for_model(obj)
-    like, is_created = Read_post.objects.get_or_create(content_type=obj_type,
-                                                  object_id=obj.id, user=user)
-    return like
+    read, is_created = ReadPost.objects.get_or_create(
+        content_type=obj_type, object_id=obj.id, user=user
+    )
+    return read
 
 
-def remove_like(obj, user):
-    """Удаляет лайк с `obj`."""
+def remove_read(obj, user):
+    """Отмечает не прочитанным `obj`."""
     obj_type = ContentType.objects.get_for_model(obj)
-    Read_post.objects.filter(content_type=obj_type, object_id=obj.id,
-                        user=user).delete()
+    ReadPost.objects.filter(
+        content_type=obj_type, object_id=obj.id, user=user
+    ).delete()
 
 
-def is_fan(obj, user) -> bool:
-    """Проверяет, лайкнул ли `user` `obj`."""
+def is_read(obj, user) -> bool:
+    """Проверяет, прочитал ли `user` `obj`."""
     if not user.is_authenticated:
         return False
     obj_type = ContentType.objects.get_for_model(obj)
-    likes = Read_post.objects.filter(content_type=obj_type, object_id=obj.id,
-                                user=user)
-    return likes.exists()
-
-
-#def get_fans(obj):
-#    """Получает всех пользователей, которые лайкнули `obj`."""
-#    obj_type = ContentType.objects.get_for_model(obj)
-#    return User.objects.filter(likes__content_type=obj_type,
-#                               likes__object_id=obj.id)
+    reads = ReadPost.objects.filter(content_type=obj_type, object_id=obj.id,
+                                    user=user)
+    return reads.exists()

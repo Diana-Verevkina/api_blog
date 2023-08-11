@@ -1,17 +1,12 @@
-import datetime as dt
-from django.contrib.auth import get_user_model
+from news import services as read_services
 from news.models import Blog, Post, Follow
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-from news import services as likes_services
-
-#User = get_user_model()
-
 
 
 class PostsSerializer(serializers.ModelSerializer):
     """Сериализер для модели Post."""
-    is_fan = serializers.SerializerMethodField()
+    is_read = serializers.SerializerMethodField()
     pub_date = serializers.DateTimeField(format="%Y-%m-%d", required=False)
     author = serializers.SlugRelatedField(
         default=serializers.CurrentUserDefault(),
@@ -20,13 +15,14 @@ class PostsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('id', 'header', 'text', 'pub_date', 'author', 'blog', 'total_likes', 'is_fan')
+        fields = ('id', 'header', 'text', 'pub_date', 'author', 'blog',
+                  'total_reads', 'is_read')
 
     def get_is_fan(self, obj) -> bool:
-        """Проверяет, лайкнул ли `request.user` твит (`obj`).
+        """Проверяет, прочитал ли `request.user` пост (`obj`).
         """
         user = self.context.get('request').user
-        return likes_services.is_fan(obj, user)
+        return read_services.is_read(obj, user)
 
 
 class FollowSerializer(serializers.ModelSerializer):
@@ -38,9 +34,8 @@ class FollowSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Follow
-        validators = [UniqueTogetherValidator(
-            queryset=Follow.objects.all(),
-            fields=['user', 'blog'])]
+        validators = [UniqueTogetherValidator(queryset=Follow.objects.all(),
+                                              fields=['user', 'blog'])]
 
     def validate_blog(self, data):
         myblog = Blog.objects.get(user=self.context['request'].user)

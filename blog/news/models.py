@@ -1,19 +1,18 @@
 from django.contrib.auth import get_user_model
-from django.contrib.contenttypes.fields import GenericForeignKey, \
-    GenericRelation
+from django.contrib.contenttypes.fields import (GenericRelation,
+                                                GenericForeignKey)
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.contenttypes.models import ContentType
-
 
 User = get_user_model()
 
 
 class Blog(models.Model):
     user = models.OneToOneField(User, verbose_name='Пользователь',
-                             on_delete=models.CASCADE, related_name='blog')
+                                on_delete=models.CASCADE, related_name='blog')
     blog_name = models.CharField(max_length=20, null=True, blank=True)
 
     def __str__(self):
@@ -31,7 +30,7 @@ def save_or_create_blog(sender, instance, created, **kwargs):
             Blog.objects.create(user=instance)
 
 
-class Read_post(models.Model):
+class ReadPost(models.Model):
     user = models.ForeignKey(User, related_name='read',
                              on_delete=models.CASCADE)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
@@ -54,11 +53,10 @@ class Post(models.Model):
     blog = models.ForeignKey(Blog, verbose_name='Блог',
                                on_delete=models.CASCADE,
                                related_name='posts', null=True, blank=True)
-    likes = GenericRelation(Read_post)
-
+    reads = GenericRelation(ReadPost)
 
     class Meta:
-        ordering = ('pub_date',)
+        ordering = ('-pub_date',)
         verbose_name = 'Пост'
         verbose_name_plural = 'Посты'
 
@@ -68,8 +66,8 @@ class Post(models.Model):
                 self.author.username + '\n')
 
     @property
-    def total_likes(self):
-        return self.likes.count()
+    def total_reads(self):
+        return self.reads.count()
 
 
 class Follow(models.Model):
@@ -79,15 +77,15 @@ class Follow(models.Model):
                              help_text='Ссылка на объект пользователя, '
                                        'который подписывается')
     blog = models.ForeignKey(Blog, verbose_name='Блог',
-                               on_delete=models.CASCADE, blank=True,
-                               null=True, related_name='following_blog',
-                               help_text='Ссылка на блог пользователя, '
-                                         'на который подписываются')
-    blog_author = models.ForeignKey(User, verbose_name='Автор блога',
                              on_delete=models.CASCADE, blank=True,
-                             null=True, related_name='following',
-                             help_text='Ссылка на объект пользователя, '
-                                       'на которого подписываются')
+                             null=True, related_name='following_blog',
+                             help_text='Ссылка на блог пользователя, '
+                                       'на который подписываются')
+    blog_author = models.ForeignKey(User, verbose_name='Автор блога',
+                                    on_delete=models.CASCADE, blank=True,
+                                    null=True, related_name='following',
+                                    help_text='Ссылка на объект пользователя, '
+                                              'на которого подписываются')
 
     class Meta:
         verbose_name = 'Подписка'
