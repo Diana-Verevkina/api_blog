@@ -18,7 +18,7 @@ class PostsSerializer(serializers.ModelSerializer):
         fields = ('id', 'header', 'text', 'pub_date', 'author', 'blog',
                   'total_reads', 'is_read')
 
-    def get_is_fan(self, obj) -> bool:
+    def get_is_read(self, obj) -> bool:
         """Проверяет, прочитал ли `request.user` пост (`obj`).
         """
         user = self.context.get('request').user

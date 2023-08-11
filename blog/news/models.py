@@ -30,7 +30,7 @@ def save_or_create_blog(sender, instance, created, **kwargs):
             Blog.objects.create(user=instance)
 
 
-class ReadPost(models.Model):
+class Read_post(models.Model):
     user = models.ForeignKey(User, related_name='read',
                              on_delete=models.CASCADE)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
@@ -51,9 +51,9 @@ class Post(models.Model):
                                on_delete=models.CASCADE,
                                related_name='posts')
     blog = models.ForeignKey(Blog, verbose_name='Блог',
-                               on_delete=models.CASCADE,
-                               related_name='posts', null=True, blank=True)
-    reads = GenericRelation(ReadPost)
+                             on_delete=models.CASCADE,
+                             related_name='posts', null=True, blank=True)
+    reads = GenericRelation(Read_post)
 
     class Meta:
         ordering = ('-pub_date',)
